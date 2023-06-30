@@ -6,7 +6,7 @@ import torch.nn.functional as F
 from torch.utils.data import TensorDataset, DataLoader
 from tqdm import trange
 from torch.utils.tensorboard import SummaryWriter
-loaded_data = torch.load('data.pth')
+loaded_data = torch.load('./data.pth')
 
 i = 0
 while True:
