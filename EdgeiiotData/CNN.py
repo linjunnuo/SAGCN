@@ -69,7 +69,7 @@ class Net(nn.Module):
 net = Net()
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(net.parameters(), lr=0.01, momentum=0.9)
-num_epochs = 10
+num_epochs = 20
 for epoch in trange(num_epochs):
     for i, (images, labels) in enumerate(train_loader):
         # Forward pass
@@ -83,7 +83,7 @@ for epoch in trange(num_epochs):
         loss.backward()
         optimizer.step()
         net.eval()
-        TensorWriter.add_scalars('Loss',{'train': loss.item()},epoch)
+    TensorWriter.add_scalars('Loss',{'train': loss.item()},epoch)
     with torch.no_grad():
         correct = 0
         total = 0
