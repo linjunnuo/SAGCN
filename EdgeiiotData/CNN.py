@@ -66,10 +66,14 @@ class Net(nn.Module):
 
 
 
+best_accuracy = 0.0
+best_model_weights = None
+
 net = Net()
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(net.parameters(), lr=0.01, momentum=0.9)
 num_epochs = 20
+
 for epoch in trange(num_epochs):
     for i, (images, labels) in enumerate(train_loader):
         # Forward pass
@@ -77,13 +81,13 @@ for epoch in trange(num_epochs):
         labels = torch.argmax(labels, dim=1)  # Convert from one-hot to class indices
         loss = criterion(outputs, labels)
 
-
         # Backward and optimize
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        net.eval()
-    TensorWriter.add_scalars('Loss',{'train': loss.item()},epoch)
+        
+    # 在每个epoch结束后进行模型评估
+    net.eval()
     with torch.no_grad():
         correct = 0
         total = 0
@@ -92,7 +96,21 @@ for epoch in trange(num_epochs):
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == torch.argmax(labels, dim=1)).sum().item()
-        TensorWriter.add_scalars('Acc',{'Acc': 100 * correct / total},epoch)
-# Testing
+        
+        # 计算准确度并更新最佳模型权重
+        accuracy = 100 * correct / total
+        if accuracy > best_accuracy:
+            best_accuracy = accuracy
+            best_model_weights = net.state_dict()
+
+        # 保存最后一个epoch的模型权重
+        torch.save(net.state_dict(), './result/last.pt')
+
+    TensorWriter.add_scalars('Loss', {'train': loss.item()}, epoch)
+    TensorWriter.add_scalars('Acc', {'Acc': accuracy}, epoch)
+
+# 保存最佳模型权重
+torch.save(best_model_weights, './result/best.pt')
+
 
 
