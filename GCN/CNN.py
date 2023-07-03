@@ -21,7 +21,7 @@ parser.add_argument("--learning_rate", default=0.001)
 parser.add_argument("--num_epochs", type=int, default=10)
 args = parser.parse_args()
 
-# 加载数据并分离特征和标签
+# ------------------------------- 加载数据并分离特征和标签 ------------------------------- #
 train_data = pd.read_csv('./data/mitbih_train.csv', header=None)
 test_data = pd.read_csv('./data/mitbih_test.csv', header=None)
 train_labels = torch.tensor(train_data.iloc[:, -1].values, dtype=torch.long)
@@ -31,7 +31,7 @@ test_labels = torch.tensor(test_data.iloc[:, -1].values, dtype=torch.long)
 test_features = test_data.iloc[:, :-1].values
 
 
-# 自定义数据集类
+# ---------------------------------- 自定义数据集类 --------------------------------- #
 class ECGDataset(Dataset):
     def __init__(self, features, labels):
         self.features = features
@@ -46,7 +46,7 @@ class ECGDataset(Dataset):
         return feature, label
 
 
-# 定义CNN模型
+# ---------------------------------- 定义CNN模型 --------------------------------- #
 class CNN(nn.Module):
     def __init__(self, num_classes):
         super(CNN, self).__init__()
@@ -71,23 +71,23 @@ class CNN(nn.Module):
         return x
 
 
-# 创建数据加载器
+# ---------------------------------- 创建数据加载器 --------------------------------- #
 train_dataset = ECGDataset(train_features, train_labels)
 test_dataset = ECGDataset(test_features, test_labels)
 train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=True)
 num_classes = 5
-# 设备设置
+# ----------------------------------- 设备设置 ----------------------------------- #
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-# 创建模型实例
+# ---------------------------------- 创建模型实例 ---------------------------------- #
 model = CNN(num_classes).to(device)
 
-# 定义损失函数和优化器
+# -------------------------------- 定义损失函数和优化器 -------------------------------- #
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
 
-# 训练模型
+# ----------------------------------- 训练模型 ----------------------------------- #
 for epoch in trange(args.num_epochs):
     model.train()
     train_loss = 0
@@ -96,11 +96,11 @@ for epoch in trange(args.num_epochs):
         features = features.to(device)
         labels = labels.to(device)
         
-        # 前向传播
+        # ----------------------------------- 前向传播 ----------------------------------- #
         outputs = model(features)
         loss = criterion(outputs, labels)
 
-        # 反向传播和优化
+        # ---------------------------------- 反向传播和优化 --------------------------------- #
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -112,7 +112,7 @@ for epoch in trange(args.num_epochs):
     train_loss /= len(train_loader.dataset)
     train_accuracy = 100.0 * train_correct / len(train_loader.dataset)
 
-    # 在测试集上验证模型
+   # --------------------------------- 在测试集上验证模型 -------------------------------- #
     model.eval()
     test_correct = 0
     with torch.no_grad():

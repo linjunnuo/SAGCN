@@ -6,7 +6,7 @@ from torch_geometric.data import Data, DataLoader
 from torch_geometric.nn import GCNConv
 import torch.nn.functional as F
 
-# 加载数据并分离特征和标签
+# ------------------------------- 加载数据并分离特征和标签 ------------------------------- #
 train_data = pd.read_csv('./data/mitbih_train.csv', header=None)
 test_data = pd.read_csv('./data/mitbih_test.csv', header=None)
 
@@ -16,7 +16,7 @@ train_features = train_data.iloc[:, :-1].values
 test_labels = torch.tensor(test_data.iloc[:, -1].values, dtype=torch.long)
 test_features = test_data.iloc[:, :-1].values
 
-# 转化为图结构数据
+# --------------------------------- 转化为图结构数据 --------------------------------- #
 def data_to_graph(data, label):
     edge_index = torch.tensor([[i, i+1] for i in range(data.shape[0]-1)], dtype=torch.long)
     return Data(x=torch.tensor(data, dtype=torch.float).view(-1, 1), 
@@ -30,7 +30,7 @@ train_loader = DataLoader(train_graphs, batch_size=32, shuffle=True)
 test_loader = DataLoader(test_graphs, batch_size=32, shuffle=True)
 
 
-# 定义GCN模型
+# ---------------------------------- 定义GCN模型 --------------------------------- #
 class Net(nn.Module):
     def __init__(self, input_dim, num_classes):
         super(Net, self).__init__()
@@ -59,24 +59,24 @@ class Net(nn.Module):
         return F.log_softmax(x, dim=1)
 
 
-# 超参数设置
+# ----------------------------------- 超参数设置 ---------------------------------- #
 input_dim = 1  # 输入特征维度
 num_classes = 5  # 类别数量
 learning_rate = 0.0001
 num_epochs = 10
 
-# 设备设置
+# ----------------------------------- 设备设置 ----------------------------------- #
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-# 创建模型实例
+# ---------------------------------- 创建模型实例 ---------------------------------- #
 model = Net(input_dim, num_classes).to(device)
 
-# 定义损失函数和优化器
+# -------------------------------- 定义损失函数和优化器 -------------------------------- #
 criterion = nn.NLLLoss()
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
-# 训练模型
-# 训练模型
+
+# ----------------------------------- 训练模型 ----------------------------------- #
 for epoch in range(num_epochs):
     model.train()
     train_loss = 0
@@ -98,7 +98,7 @@ for epoch in range(num_epochs):
     train_loss /= len(train_loader.dataset)
     train_accuracy = 100.0 * train_correct / train_total  # 使用累积的样本数量计算准确率
 
-    # 在测试集上验证模型
+    # --------------------------------- 在测试集上验证模型 -------------------------------- #
     model.eval()
     test_correct = 0
     test_total = 0
@@ -112,6 +112,6 @@ for epoch in range(num_epochs):
 
     test_accuracy = 100.0 * test_correct / test_total  # 使用累积的样本数量计算准确率
 
-    # 打印训练结果
+    # ---------------------------------- 打印训练结果 ---------------------------------- #
     print(f'Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss:.4f}, Train Accuracy: {train_accuracy:.2f}%, Test Accuracy: {test_accuracy:.2f}%')
 
